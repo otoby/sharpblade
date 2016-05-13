@@ -7,7 +7,7 @@ sharpblade is a clone of [XiaoLer/blade](https://github.com/XiaoLer/blade) which
 It turns out that the inbuilt PHP template system works, infact very well. It just so happen that people like little changes.
 
 ### sharpblade goals
-restore the pride of the PHP template as "we suppose to" with focus the "little changes that people like"
+restore the pride of the PHP template as "we suppose to" with focus on "little changes that people like"
 
 ### status
 experimental
