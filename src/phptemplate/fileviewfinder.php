@@ -7,13 +7,6 @@ use InvalidArgumentException;
 class FileViewFinder implements ViewFinderInterface {
 
     /**
-     * The filesystem instance.
-     *
-     * @var \Xiaoler\Blade\Filesystem
-     */
-    protected $files;
-
-    /**
      * The array of active view paths.
      *
      * @var array
@@ -49,7 +42,6 @@ class FileViewFinder implements ViewFinderInterface {
      * @return void
      */
     public function __construct(array $paths, array $extensions = null) {
-        $this->files = new Filesystem;
         $this->paths = $paths;
 
         if (isset($extensions)) {
@@ -121,7 +113,7 @@ class FileViewFinder implements ViewFinderInterface {
     protected function findInPaths($name, $paths) {
         foreach ((array) $paths as $path) {
             foreach ($this->getPossibleViewFiles($name) as $file) {
-                if ($this->files->exists($viewPath = $path . '/' . $file)) {
+                if (file_exists($viewPath = $path . '/' . $file)) {
                     return $viewPath;
                 }
             }
@@ -208,15 +200,6 @@ class FileViewFinder implements ViewFinderInterface {
      */
     public function hasHintInformation($name) {
         return strpos($name, static::HINT_PATH_DELIMITER) > 0;
-    }
-
-    /**
-     * Get the filesystem instance.
-     *
-     * @return \Xiaoler\Blade\Filesystem
-     */
-    public function getFilesystem() {
-        return $this->files;
     }
 
     /**

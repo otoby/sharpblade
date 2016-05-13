@@ -2,16 +2,8 @@
 
 namespace phptemplate\compilers;
 
-use phptemplate\Filesystem;
 
 abstract class Compiler {
-
-    /**
-     * The Filesystem instance.
-     *
-     * @var \Xiaoler\Blade\Filesystem
-     */
-    protected $files;
 
     /**
      * Get the cache path for the compiled views.
@@ -27,7 +19,6 @@ abstract class Compiler {
      * @return void
      */
     public function __construct($cachePath) {
-        $this->files = new Filesystem;
         $this->cachePath = $cachePath;
     }
 
@@ -53,13 +44,11 @@ abstract class Compiler {
         // If the compiled file doesn't exist we will indicate that the view is expired
         // so that it can be re-compiled. Else, we will verify the last modification
         // of the views is less than the modification times of the compiled views.
-        if (!$this->cachePath || !$this->files->exists($compiled)) {
+        if (!$this->cachePath || !file_exists($compiled)) {
             return true;
         }
 
-        $lastModified = $this->files->lastModified($path);
-
-        return $lastModified >= $this->files->lastModified($compiled);
+        return filemtime($path) >= filemtime($compiled);
     }
 
 }
