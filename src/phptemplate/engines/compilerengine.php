@@ -5,7 +5,7 @@ namespace phptemplate\engines;
 use ErrorException;
 use phptemplate\compilers\CompilerInterface;
 
-class CompilerEngine extends PhpEngine {
+class CompilerEngine extends TemplateEngine {
 
     /**
      * The Blade compiler instance.
@@ -19,7 +19,7 @@ class CompilerEngine extends PhpEngine {
      *
      * @var array
      */
-    protected $lastCompiled = [];
+    protected $lastCompiled = array();
 
     /**
      * Create a new Blade view engine instance.
@@ -38,7 +38,7 @@ class CompilerEngine extends PhpEngine {
      * @param  array   $data
      * @return string
      */
-    public function get($path, array $data = []) {
+    public function get($path, array $data = array()) {
         $this->lastCompiled[] = $path;
 
         // If this given view has expired, which means it has simply been edited since

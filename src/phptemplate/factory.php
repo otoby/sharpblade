@@ -11,14 +11,14 @@ class Factory {
     /**
      * The engine implementation.
      *
-     * @var \Xiaoler\Blade\Engines\EngineInterface
+     * @var \phptemplate\engines\EngineInterface
      */
     protected $engine;
 
     /**
      * The view finder implementation.
      *
-     * @var \Xiaoler\Blade\ViewFinderInterface
+     * @var \phptemplate\ViewFinderInterface
      */
     protected $finder;
 
@@ -27,35 +27,35 @@ class Factory {
      *
      * @var array
      */
-    protected $shared = [];
+    protected $shared = array();
 
     /**
      * Array of registered view name aliases.
      *
      * @var array
      */
-    protected $aliases = [];
+    protected $aliases = array();
 
     /**
      * All of the registered view names.
      *
      * @var array
      */
-    protected $names = [];
+    protected $names = array();
 
     /**
      * All of the finished, captured sections.
      *
      * @var array
      */
-    protected $sections = [];
+    protected $sections = array();
 
     /**
      * The stack of in-progress sections.
      *
      * @var array
      */
-    protected $sectionStack = [];
+    protected $sectionStack = array();
 
     /**
      * The number of active rendering operations.
@@ -67,7 +67,7 @@ class Factory {
     /**
      * Create a new view factory instance.
      *
-     * @param  \Xiaoler\Blade\ViewFinderInterface  $finder
+     * @param  \phptemplate\ViewFinderInterface  $finder
      * @return void
      */
     public function __construct(EngineInterface $engine, ViewFinderInterface $finder) {
@@ -77,18 +77,43 @@ class Factory {
         $this->share('__env', $this);
     }
 
+    protected function gatherData($_data) {
+        $data = array_merge($this->getShared(), $_data);
+
+        foreach ($data as $key => $value) {
+            if ($value instanceof Renderable) {
+                $data[$key] = $value->render();
+            }
+        }
+
+        return $data;
+    }
+
+    public function renderContents(View $view) {
+        $this->incrementRender();
+
+        $content = $this->engine->get($view->path, $this->gatherData($view->data));
+
+        $view->_rawContent = $content;
+
+        // Once we've finished rendering the view, we'll decrement the render count
+        // so that each sections get flushed out next time a view is created and
+        // no old sections are staying around in the memory of an environment.
+        $this->decrementRender();
+    }
+
     /**
      * Get the evaluated view contents for the given view.
      *
      * @param  string  $path
      * @param  array   $data
      * @param  array   $mergeData
-     * @return \Xiaoler\Blade\View
+     * @return \phptemplate\View
      */
-    public function file($path, $data = [], $mergeData = []) {
+    public function file($path, $data = array(), $mergeData = array()) {
         $data = array_merge($mergeData, $data);
 
-        $view = new View($this, $this->engine, $path, $path, $data);
+        $view = new View($this, $path, $path, $data);
 
         return $view;
     }
@@ -99,9 +124,9 @@ class Factory {
      * @param  string  $view
      * @param  array   $data
      * @param  array   $mergeData
-     * @return \Xiaoler\Blade\View
+     * @return \phptemplate\View
      */
-    public function make($view, $data = [], $mergeData = []) {
+    public function make($view, $data = array(), $mergeData = array()) {
         if (isset($this->aliases[$view])) {
             $view = $this->aliases[$view];
         }
@@ -112,8 +137,7 @@ class Factory {
 
         $data = array_merge($mergeData, $data);
 
-        $view = new View($this, $this->engine, $view, $path, $data);
-
+        $view = new View($this, $view, $path, $data);
         return $view;
     }
 
@@ -140,9 +164,9 @@ class Factory {
      *
      * @param  string  $view
      * @param  mixed   $data
-     * @return \Xiaoler\Blade\View
+     * @return \phptemplate\View
      */
-    public function of($view, $data = []) {
+    public function of($view, $data = array()) {
         return $this->make($this->names[$view], $data);
     }
 
@@ -201,7 +225,7 @@ class Factory {
         // iterated value of this data array, allowing the views to access them.
         if (count($data) > 0) {
             foreach ($data as $key => $value) {
-                $data = ['key' => $key, $iterator => $value];
+                $data = array('key' => $key, $iterator => $value);
 
                 $result .= $this->make($view, $data)->render();
             }
@@ -352,9 +376,9 @@ class Factory {
      * @return void
      */
     public function flushSections() {
-        $this->sections = [];
+        $this->sections = array();
 
-        $this->sectionStack = [];
+        $this->sectionStack = array();
     }
 
     /**
@@ -430,7 +454,7 @@ class Factory {
     /**
      * Get the view finder instance.
      *
-     * @return \Xiaoler\Blade\ViewFinderInterface
+     * @return \phptemplate\ViewFinderInterface
      */
     public function getFinder() {
         return $this->finder;
@@ -439,7 +463,7 @@ class Factory {
     /**
      * Set the view finder instance.
      *
-     * @param  \Xiaoler\Blade\ViewFinderInterface  $finder
+     * @param  \phptemplate\ViewFinderInterface  $finder
      * @return void
      */
     public function setFinder(ViewFinderInterface $finder) {

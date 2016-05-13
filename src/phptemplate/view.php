@@ -4,7 +4,6 @@ namespace phptemplate;
 
 use ArrayAccess;
 use BadMethodCallException;
-use phptemplate\engines\EngineInterface;
 
 class View implements ArrayAccess {
 
@@ -16,50 +15,33 @@ class View implements ArrayAccess {
     protected $factory;
 
     /**
-     * The engine implementation.
-     *
-     * @var \Xiaoler\Blade\Engines\EngineInterface
-     */
-    protected $engine;
-
-    /**
      * The name of the view.
      *
      * @var string
      */
-    protected $view;
+    public $view;
 
     /**
      * The array of view data.
      *
      * @var array
      */
-    protected $data;
+    public $data;
 
     /**
      * The path to the view file.
      *
      * @var string
      */
-    protected $path;
+    public $path;
+    public $_rawContent = '';
 
-    /**
-     * Create a new view instance.
-     *
-     * @param  \Xiaoler\Blade\Factory  $factory
-     * @param  \Xiaoler\Blade\Engines\EngineInterface  $engine
-     * @param  string  $view
-     * @param  string  $path
-     * @param  array   $data
-     * @return void
-     */
-    public function __construct(Factory $factory, EngineInterface $engine, $view, $path, $data = []) {
-        $this->view = $view;
+    public function __construct(Factory $factory, $name, $path, array $data = array()) {
+        $this->view = $name;
         $this->path = $path;
-        $this->engine = $engine;
         $this->factory = $factory;
 
-        $this->data = (array) $data;
+        $this->data = $data;
     }
 
     /**
@@ -69,38 +51,17 @@ class View implements ArrayAccess {
      * @return string
      */
     public function render(callable $callback = null) {
-        $contents = $this->renderContents();
 
-        $response = isset($callback) ? call_user_func($callback, $this, $contents)
-                    : null;
+        $this->factory->renderContents($this);
+
+        $response = isset($callback) ? call_user_func($callback, $this, $this->_rawContent) : null;
 
         // Once we have the contents of the view, we will flush the sections if we are
         // done rendering all views so that there is nothing left hanging over when
         // another view gets rendered in the future by the application developer.
         $this->factory->flushSectionsIfDoneRendering();
 
-        return !is_null($response) ? $response : $contents;
-    }
-
-    /**
-     * Get the contents of the view instance.
-     *
-     * @return string
-     */
-    protected function renderContents() {
-        // We will keep track of the amount of views being rendered so we can flush
-        // the section after the complete rendering operation is done. This will
-        // clear out the sections for any separate views that may be rendered.
-        $this->factory->incrementRender();
-
-        $contents = $this->getContents();
-
-        // Once we've finished rendering the view, we'll decrement the render count
-        // so that each sections get flushed out next time a view is created and
-        // no old sections are staying around in the memory of an environment.
-        $this->factory->decrementRender();
-
-        return $contents;
+        return !is_null($response) ? $response : $this->_rawContent;
     }
 
     /**
@@ -112,32 +73,6 @@ class View implements ArrayAccess {
         return $this->render(function () {
                     return $this->factory->getSections();
                 });
-    }
-
-    /**
-     * Get the evaluated contents of the view.
-     *
-     * @return string
-     */
-    protected function getContents() {
-        return $this->engine->get($this->path, $this->gatherData());
-    }
-
-    /**
-     * Get the data bound to the view instance.
-     *
-     * @return array
-     */
-    protected function gatherData() {
-        $data = array_merge($this->factory->getShared(), $this->data);
-
-        foreach ($data as $key => $value) {
-            if ($value instanceof Renderable) {
-                $data[$key] = $value->render();
-            }
-        }
-
-        return $data;
     }
 
     /**
@@ -165,7 +100,7 @@ class View implements ArrayAccess {
      * @param  array   $data
      * @return $this
      */
-    public function nest($key, $view, array $data = []) {
+    public function nest($key, $view, array $data = array()) {
         return $this->with($key, $this->factory->make($view, $data));
     }
 
@@ -176,15 +111,6 @@ class View implements ArrayAccess {
      */
     public function getFactory() {
         return $this->factory;
-    }
-
-    /**
-     * Get the view's rendering engine.
-     *
-     * @return \Xiaoler\Blade\Engines\EngineInterface
-     */
-    public function getEngine() {
-        return $this->engine;
     }
 
     /**

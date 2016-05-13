@@ -2,6 +2,8 @@
 
 namespace phptemplate;
 
+use phptemplate\compilers\Characteristics as C;
+
 interface ViewFinderInterface {
 
     /**
@@ -9,7 +11,7 @@ interface ViewFinderInterface {
      *
      * @var string
      */
-    const HINT_PATH_DELIMITER = '::';
+    const HINT_PATH_DELIMITER = C::HINT_PATH_DELIMITER;
 
     /**
      * Get the fully qualified location of the view.

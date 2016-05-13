@@ -11,5 +11,5 @@ interface EngineInterface {
      * @param  array   $data
      * @return string
      */
-    public function get($path, array $data = []);
+    public function get($path, array $data = array());
 }

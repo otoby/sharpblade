@@ -18,21 +18,21 @@ class FileViewFinder implements ViewFinderInterface {
      *
      * @var array
      */
-    protected $views = [];
+    protected $views = array();
 
     /**
      * The namespace to file path hints.
      *
      * @var array
      */
-    protected $hints = [];
+    protected $hints = array();
 
     /**
      * Register a view extension with the finder.
      *
      * @var array
      */
-    protected $extensions = ['blade.php', 'php'];
+    protected $extensions = array('blade.php', 'php');
 
     /**
      * Create a new file view loader instance.
@@ -74,31 +74,13 @@ class FileViewFinder implements ViewFinderInterface {
      * @return string
      */
     protected function findNamedPathView($name) {
-        list($namespace, $view) = $this->getNamespaceSegments($name);
+        list($namespace, $view) = explode(static::HINT_PATH_DELIMITER, $name, 2);
+
+        if (!isset($this->hints[$namespace])) {
+            throw new InvalidArgumentException("No hint path defined for [{$namespace}].");
+        }
 
         return $this->findInPaths($view, $this->hints[$namespace]);
-    }
-
-    /**
-     * Get the segments of a template with a named path.
-     *
-     * @param  string  $name
-     * @return array
-     *
-     * @throws \InvalidArgumentException
-     */
-    protected function getNamespaceSegments($name) {
-        $segments = explode(static::HINT_PATH_DELIMITER, $name);
-
-        if (count($segments) != 2) {
-            throw new InvalidArgumentException("View [$name] has an invalid name.");
-        }
-
-        if (!isset($this->hints[$segments[0]])) {
-            throw new InvalidArgumentException("No hint path defined for [{$segments[0]}].");
-        }
-
-        return $segments;
     }
 
     /**
@@ -110,8 +92,8 @@ class FileViewFinder implements ViewFinderInterface {
      *
      * @throws \InvalidArgumentException
      */
-    protected function findInPaths($name, $paths) {
-        foreach ((array) $paths as $path) {
+    protected function findInPaths($name, array $paths) {
+        foreach ($paths as $path) {
             foreach ($this->getPossibleViewFiles($name) as $file) {
                 if (file_exists($viewPath = $path . '/' . $file)) {
                     return $viewPath;
@@ -128,7 +110,7 @@ class FileViewFinder implements ViewFinderInterface {
      * @param  string  $name
      * @return array
      */
-    protected function getPossibleViewFiles($name) {
+    private function getPossibleViewFiles($name) {
         return array_map(function ($extension) use ($name) {
             return str_replace('.', '/', $name) . '.' . $extension;
         }, $this->extensions);

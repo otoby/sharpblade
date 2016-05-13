@@ -11,7 +11,7 @@ class BladeCompiler extends Compiler implements CompilerInterface {
      *
      * @var array
      */
-    protected $customDirectives = [];
+    protected $customDirectives = array();
 
     /**
      * The file currently being compiled.
@@ -25,32 +25,32 @@ class BladeCompiler extends Compiler implements CompilerInterface {
      *
      * @var array
      */
-    protected $compilers = [
+    protected $compilers = array(
         'Statements',
         'Comments',
         'Echos',
-    ];
+    );
 
     /**
      * Array of opening and closing tags for raw echos.
      *
      * @var array
      */
-    protected $rawTags = ['{!!', '!!}'];
+    protected $rawTags = array('{!!', '!!}');
 
     /**
      * Array of opening and closing tags for regular echos.
      *
      * @var array
      */
-    protected $contentTags = ['{{', '}}'];
+    protected $contentTags = array('{{', '}}');
 
     /**
      * Array of opening and closing tags for escaped echos.
      *
      * @var array
      */
-    protected $escapedTags = ['{{{', '}}}'];
+    protected $escapedTags = array('{{{', '}}}');
 
     /**
      * The "regular" / legacy echo string format.
@@ -64,7 +64,7 @@ class BladeCompiler extends Compiler implements CompilerInterface {
      *
      * @var array
      */
-    protected $footer = [];
+    protected $footer = array();
 
     /**
      * Counter to keep track of nested forelse statements.
@@ -119,7 +119,7 @@ class BladeCompiler extends Compiler implements CompilerInterface {
     public function compileString($value) {
         $result = '';
 
-        $this->footer = [];
+        $this->footer = array();
 
         // Here we will loop through all of the tokens returned by the Zend lexer and
         // parse each one into the corresponding valid PHP. We will then have this
@@ -189,11 +189,11 @@ class BladeCompiler extends Compiler implements CompilerInterface {
      * @return array
      */
     protected function getEchoMethods() {
-        $methods = [
+        $methods = array(
             'compileRawEchos' => strlen(stripcslashes($this->rawTags[0])),
             'compileEscapedEchos' => strlen(stripcslashes($this->escapedTags[0])),
             'compileRegularEchos' => strlen(stripcslashes($this->contentTags[0])),
-        ];
+        );
 
         uksort($methods, function ($method1, $method2) use ($methods) {
             // Ensure the longest tags are processed first
@@ -645,7 +645,7 @@ class BladeCompiler extends Compiler implements CompilerInterface {
      * @return void
      */
     public function setRawTags($openTag, $closeTag) {
-        $this->rawTags = [preg_quote($openTag), preg_quote($closeTag)];
+        $this->rawTags = array(preg_quote($openTag), preg_quote($closeTag));
     }
 
     /**
@@ -659,7 +659,7 @@ class BladeCompiler extends Compiler implements CompilerInterface {
     public function setContentTags($openTag, $closeTag, $escaped = false) {
         $property = ($escaped === true) ? 'escapedTags' : 'contentTags';
 
-        $this->{$property} = [preg_quote($openTag), preg_quote($closeTag)];
+        $this->{$property} = array(preg_quote($openTag), preg_quote($closeTag));
     }
 
     /**

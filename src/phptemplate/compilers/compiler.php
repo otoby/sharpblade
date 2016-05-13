@@ -2,7 +2,6 @@
 
 namespace phptemplate\compilers;
 
-
 abstract class Compiler {
 
     /**
