@@ -2,6 +2,7 @@
 
 @section('title', 'Page Title')
 
+{{--Testing comment --}}
 @section('sidebar')
     @parent
 

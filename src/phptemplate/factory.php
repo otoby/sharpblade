@@ -63,6 +63,8 @@ class Factory {
      * @var int
      */
     protected $renderCount = 0;
+    
+    private $statementTag = '@';
 
     /**
      * Create a new view factory instance.
@@ -73,6 +75,8 @@ class Factory {
     public function __construct(EngineInterface $engine, ViewFinderInterface $finder) {
         $this->finder = $finder;
         $this->engine = $engine;
+        
+        $this->statementTag = $this->engine->getCompiler()->configuration['STATEMENT_TAG'];
 
         $this->share('__env', $this);
     }
@@ -343,7 +347,7 @@ class Factory {
      */
     protected function extendSection($section, $content) {
         if (isset($this->sections[$section])) {
-            $content = str_replace('@parent', $content, $this->sections[$section]);
+            $content = str_replace("{$this->statementTag}parent", $content, $this->sections[$section]);
         }
 
         $this->sections[$section] = $content;
@@ -363,10 +367,12 @@ class Factory {
             $sectionContent = $this->sections[$section];
         }
 
-        $sectionContent = str_replace('@@parent', '--parent--holder--', $sectionContent);
+        $sectionContent = str_replace("{$this->statementTag}{$this->statementTag}parent", '--parent--holder--', $sectionContent);
+
+        $parentTag = "{$this->statementTag}parent";
 
         return str_replace(
-                '--parent--holder--', '@parent', str_replace('@parent', '', $sectionContent)
+                '--parent--holder--', $parentTag, str_replace($parentTag, '', $sectionContent)
         );
     }
 

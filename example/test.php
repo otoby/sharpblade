@@ -1,9 +1,9 @@
 <?php
 
-$path = [$_SERVER['DOCUMENT_ROOT'] . '/views'];         // your view file path, it's an array
+$path = array($_SERVER['DOCUMENT_ROOT'] . '/views');         // your view file path, it's an array
 $cachePath = $_SERVER['DOCUMENT_ROOT'] . '/cache_path';     // compiled file path
 
-$compiler = new \phptemplate\compilers\BladeCompiler($cachePath);
+$compiler = new \phptemplate\compilers\BladeCompiler();
 
 // you can add a custom directive if you want
 $compiler->directive('datetime', function($timestamp) {
@@ -19,4 +19,4 @@ $finder = new \phptemplate\FileViewFinder($path);
 $factory = new \phptemplate\Factory($engine, $finder);
 
 // render the template file and echo it
-echo $factory->make('child', ['records' => ['a' => 1, 'b' => 2], 'name' => 'John Doe'])->render();
+echo $factory->make('child', array('records' => array('a' => 1, 'b' => 2), 'name' => 'John Doe'))->render();

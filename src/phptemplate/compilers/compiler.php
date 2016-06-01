@@ -2,23 +2,20 @@
 
 namespace phptemplate\compilers;
 
-abstract class Compiler {
+abstract class Compiler extends CompilerConfiguration {
 
-    /**
-     * Get the cache path for the compiled views.
-     *
-     * @var string
-     */
-    protected $cachePath;
+    public function __construct() {
 
-    /**
-     * Create a new compiler instance.
-     *
-     * @param  string  $cachePath
-     * @return void
-     */
-    public function __construct($cachePath) {
-        $this->cachePath = $cachePath;
+        if (!$this->configuration['COMPILE_CACHE']) {
+            $tempnam = tempnam(sys_get_temp_dir(), 'TEM');
+            $this->configuration['CACHE_PATH'] = $tempnam;
+
+            register_shutdown_function(function() use ($tempnam) {
+                unlink($tempnam);
+            });
+        } elseif ($this->configuration['CACHE_PATH'] == '') {
+            $this->configuration['CACHE_PATH'] = dirname(__FILE__);
+        }
     }
 
     /**
@@ -28,7 +25,11 @@ abstract class Compiler {
      * @return string
      */
     public function getCompiledPath($path) {
-        return $this->cachePath . '/' . md5($path);
+        if ($this->configuration['COMPILE_CACHE']) {
+            return $this->configuration['CACHE_PATH'] . '/' . md5($path);
+        }
+
+        return $this->configuration['CACHE_PATH'];
     }
 
     /**
@@ -43,7 +44,7 @@ abstract class Compiler {
         // If the compiled file doesn't exist we will indicate that the view is expired
         // so that it can be re-compiled. Else, we will verify the last modification
         // of the views is less than the modification times of the compiled views.
-        if (!$this->cachePath || !file_exists($compiled)) {
+        if (!file_exists($compiled)) {
             return true;
         }
 
