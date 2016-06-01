@@ -4,7 +4,11 @@ namespace phptemplate\compilers;
 
 abstract class Compiler extends CompilerConfiguration {
 
-    public function __construct() {
+    public function __construct(array $configuration = null) {
+
+        if (isset($configuration)) {
+            $this->configuration = $configuration + $this->configuration;
+        }
 
         if (!$this->configuration['COMPILE_CACHE']) {
             $tempnam = tempnam(sys_get_temp_dir(), 'TEM');
